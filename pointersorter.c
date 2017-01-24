@@ -30,6 +30,14 @@ void printlist(Node* head){
     }
 }
 
+void freelist(Node* head){
+    if (head->next != NULL){
+        freelist(head->next);
+    }
+    free(head);
+}
+
+
 int main(int argc, char * argv[]) {
     if (argc < 2) {
         printf("Needs one argument, none given\n");
@@ -40,7 +48,7 @@ int main(int argc, char * argv[]) {
         exit(1);
     }
     char* input = argv[1];
-    printf("%s\n",input);
+    int inputlen = (int)strlen(input);
     int i;
     // Get to the first word
     for (i=0;!isalpha(input[i]);i++){
@@ -51,8 +59,9 @@ int main(int argc, char * argv[]) {
     // Declare a Node pointer which will point to the head of the linked list
     Node* head = NULL; 
     int wordlen;
-    while (input[i] != '\0'){
+    while (i<inputlen){
         wordlen = 0;
+        // Get to the end of the current word
         while (isalpha(input[i])){
             i++;
             wordlen++;
@@ -60,13 +69,14 @@ int main(int argc, char * argv[]) {
         Node* n = malloc(sizeof(Node));
         n->word = input + i - wordlen;
         n->word[wordlen] = '\0';
+
         i++;
         head = insert(head,n);
         if (input[i] == '\0'){
             break;
         }
         // Get to the next word
-        while (!isalpha(input[i])){
+        while (!isalpha(input[i]) && i<inputlen){
             i++;
             if (input[i] == '\0'){
                 break;
@@ -74,5 +84,6 @@ int main(int argc, char * argv[]) {
         }
     }
     printlist(head);
+    freelist(head);
 	return 0;
 }
