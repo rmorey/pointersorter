@@ -89,7 +89,6 @@ Node* parseinput(char * input){
     return head;
 }
 
-
 int main(int argc, char * argv[]) {
     if (argc < 2) {
         printf("Needs one argument, none given\n");
@@ -101,7 +100,9 @@ int main(int argc, char * argv[]) {
     }
     // Parse the input into a sorted linked list
     Node* head = parseinput(argv[1]);
+    // Print the linked list
     printlist(head);
+    // free up the memory
     freelist(head);
 	return 0;
 }
