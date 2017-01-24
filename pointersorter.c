@@ -5,7 +5,7 @@
 
 // Node in a linked list
 typedef struct Node{
-    // pointer to the first char of the word in the input string
+    // Pointer to the first char of the word in the input string
     char * word;
     // Pointer to the next node in the list
     struct Node* next;
