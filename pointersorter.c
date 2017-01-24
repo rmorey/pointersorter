@@ -3,12 +3,26 @@
 #include <string.h>
 #include <ctype.h>
 
-
 typedef struct Nodes {
-    char* string;
-    struct Node* left;
-    struct Node* right;
+    char* word;
+    struct Node* next;
 } Node;
+
+int isnull(char c){
+    return (c == '\0');
+}
+
+Node* insert(Node* root, Node* n){
+    if (root == NULL){
+        return n;
+    }
+    if (strcmp(root->word,n->word) > 0){
+        n->next = root;
+        return n;
+    }
+    root->next = insert(root->next,n);
+    return root;
+}
 
 
 int main(int argc, char * argv[]) {
@@ -22,24 +36,30 @@ int main(int argc, char * argv[]) {
     }
     char * input = argv[1];
     int wordlen;
-    char * word;
-    int i = 0;
-    while (input[i] != '\0'){
+    int i;
+    for (i=0;!isalpha(input[i]);i++){
+        if isnull(input[i]){
+            exit(0);
+        }
+    }
+    Node* root = NULL;
+    while (!isnull(input[i])){
         wordlen = 0;
         while (isalpha(input[i])){
             i++;
             wordlen++;
         }
-        word = (char *)malloc(wordlen+1);
-        memcpy(word,&input[i-wordlen],wordlen);
-        word[wordlen] = '\0';
-        printf("%s\n",word);
-        if (input[i] == '\0'){
+        Node n;
+        n->word = (char *)malloc(wordlen+1);
+        memcpy(n->word,&input[i-wordlen],wordlen);
+        n->word[wordlen] = '\0';
+        root = insert(root,n)
+        if (isnull(input[i])){
             exit(0);
         }
         while (!isalpha(input[i])){
             i++;
-            if (input[i] == '\0'){
+            if (isnull(input[i])){
                 exit(0);
             }
         }
