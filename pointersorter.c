@@ -33,8 +33,11 @@ void printlist(Node* head){
     }
 }
 
-// free up the list memory
+// free up all the list memory, recursively
 void freelist(Node* head){
+    if (head == NULL){
+        return;
+    }
     if (head->next != NULL){
         freelist(head->next);
     }
@@ -60,13 +63,17 @@ Node* parseinput(char * input){
             i++;
             wordlen++;
         }
-        // Create the new node, pointing to the word
+        // Create the new node, and point to its word
         Node* n = malloc(sizeof(Node));
         n->word = input + i - wordlen;
+        // Check to see if we're now at the end of the input string
         if (input[i] == '\0'){
             head = insert(head,n);
             break;
         }
+        // Put a null byte after the string (yes, in the middle of the input string)
+        // we are saving memory by just referencing the word in the input string
+        // but we want to use string.h functions on it, so we put a null byte
         n->word[wordlen] = '\0';
         // insert the node into the linked list
         head = insert(head,n);
@@ -92,6 +99,7 @@ int main(int argc, char * argv[]) {
         printf("Too many arguments, needs exactly one\n");
         exit(1);
     }
+    // Parse the input into a sorted linked list
     Node* head = parseinput(argv[1]);
     printlist(head);
     freelist(head);
