@@ -1,5 +1,5 @@
 all: pointersorter.c
-	gcc -Wall -o bin/pointersorter pointersorter.c
+	gcc -g -Wall -o bin/pointersorter pointersorter.c
 
 tar: pointersorter.c testcases.txt
 	cp pointersorter.c testcases.txt Asst0
