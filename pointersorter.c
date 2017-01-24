@@ -3,9 +3,11 @@
 #include <string.h>
 #include <ctype.h>
 
+// Node in a linked list
 typedef struct Node{
     // pointer to the first char of the word in the input string
     char * word;
+    // Pointer to the next node in the list
     struct Node* next;
 } Node;
 
@@ -23,6 +25,7 @@ Node* insert(Node* head, Node* n){
     return head;
 }
 
+// print the list
 void printlist(Node* head){
     while(head != NULL){
         printf("%s\n",head->word);
@@ -30,11 +33,53 @@ void printlist(Node* head){
     }
 }
 
+// free up the list memory
 void freelist(Node* head){
     if (head->next != NULL){
         freelist(head->next);
     }
     free(head);
+}
+
+// parse the input string and return a Node which is the head of a sorted linked list
+Node* parseinput(char * input){
+    int i;
+    // Get to the first word
+    for (i=0;!isalpha(input[i]);i++){
+        if (input[i] == '\0'){
+            return NULL;
+        }
+    }
+    // Declare a Node pointer which will point to the head of the linked list
+    Node* head = NULL; 
+    int wordlen;
+    while (1){
+        wordlen = 0;
+        // Get to the end of the current word
+        while (isalpha(input[i])){
+            i++;
+            wordlen++;
+        }
+        // Create the new node, pointing to the word
+        Node* n = malloc(sizeof(Node));
+        n->word = input + i - wordlen;
+        if (input[i] == '\0'){
+            head = insert(head,n);
+            break;
+        }
+        n->word[wordlen] = '\0';
+        // insert the node into the linked list
+        head = insert(head,n);
+        i++;
+        // Get to the next word
+        while (!isalpha(input[i])){
+            if (input[i] == '\0'){
+                return head;
+            }
+            i++;
+        }
+    }
+    return head;
 }
 
 
@@ -47,42 +92,7 @@ int main(int argc, char * argv[]) {
         printf("Too many arguments, needs exactly one\n");
         exit(1);
     }
-    char* input = argv[1];
-    int inputlen = (int)strlen(input);
-    int i;
-    // Get to the first word
-    for (i=0;!isalpha(input[i]);i++){
-        if (input[i] == '\0'){
-            exit(0);
-        }
-    }
-    // Declare a Node pointer which will point to the head of the linked list
-    Node* head = NULL; 
-    int wordlen;
-    while (i<inputlen){
-        wordlen = 0;
-        // Get to the end of the current word
-        while (isalpha(input[i])){
-            i++;
-            wordlen++;
-        }
-        Node* n = malloc(sizeof(Node));
-        n->word = input + i - wordlen;
-        n->word[wordlen] = '\0';
-
-        i++;
-        head = insert(head,n);
-        if (input[i] == '\0'){
-            break;
-        }
-        // Get to the next word
-        while (!isalpha(input[i]) && i<inputlen){
-            i++;
-            if (input[i] == '\0'){
-                break;
-            }
-        }
-    }
+    Node* head = parseinput(argv[1]);
     printlist(head);
     freelist(head);
 	return 0;
