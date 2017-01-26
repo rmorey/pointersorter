@@ -7,6 +7,8 @@
 typedef struct Node{
     // Pointer to the first char of the word in the input string
     char * word;
+    // Length of the word
+    int len;
     // Pointer to the next node in the list
     struct Node* next;
 } Node;
@@ -17,21 +19,36 @@ Node* insert(Node* head, Node* n){
     if (head == NULL){
         return n;
     }
-    if (strcmp(head->word,n->word) > 0){
-        n->next = head;
-        return n;
+    // get the min length of the two strings
+    int min = (head->len < n->len) ? head->len : n->len;
+    // compare up to the end of the shorter string
+    int cmp = strncmp(head->word,n->word,min);
+    // If they are equal for min bytes, then we want to put the 
+    // shorter one first (it doesn't matter which goes first
+    // if they are equal in length)
+    if (cmp == 0){ 
+        cmp = (head->len < n->len) ? -1 : 1;
     }
-    head->next = insert(head->next,n);
+    if (cmp < 0){
+        head->next = insert(head->next,n);
+    }
+    if (cmp > 0){
+        n->next = head;
+        head = n;
+    }
     return head;
 }
 
+
 // print the list
 void printlist(Node* head){
-    while(head != NULL){
-        printf("%s\n",head->word);
-        head = head->next;
+    if (head == NULL){
+        return;
     }
+    printf("%.*s\n",head->len,head->word);
+    printlist(head->next);
 }
+    
 
 // free up all the list memory, recursively
 void freelist(Node* head){
@@ -61,38 +78,22 @@ Node* parseinput(char * input){
         wordlen = 0;
         // Get to the end of the current word
         while (isalpha(input[i])){
-            i++;
             wordlen++;
+            i++;
         }
         // Create the new node, and point its word to the start of the current
         // word in the input string
-        Node* n = malloc(sizeof(Node));
+        Node* n = (Node*)malloc(sizeof(Node));
         if (n == NULL){
             printf("Malloc failed to allocate space for new Node\n");
             exit(-1);
         }
-        n->word = input + i - wordlen;
-        // Break to see if we're now at the end of the input string, and if so
-        // insert it into the linked list and return the head
-        if (input[i] == '\0'){
-            head = insert(head,n);
-            return head;
-        }
-        // Put a null byte after the string (yes, in the middle of the input string)
-        // We are saving memory by just referencing the words inside the input string
-        // but we want to use string.h functions on it, so we put a null byte at the end
-        // (overwriting whatever the next character is, but we don't care cause we know 
-        // it's not alphabetic)
-        //
-        // We are aware that Prof. Francisco said not to modify argv, but it seems like a total waste of
-        // space to copy it all again, and getopt() does it, and programs like mysql do it to hide
-        // password arguments from other programs, so we're gonna do it.
-        //
-        // Well, maybe inserting the null byte into the middle of a normal string is particularly sketchy...
-        n->word[wordlen] = '\0';
+        // instead of copying the string, we just point to its location
+        // in the input string and keep track of the length 
+        n->word = input + i - wordlen; // slick pointer arithmetic
+        n->len = wordlen;
         // insert the node into the linked list
         head = insert(head,n);
-        i++;
         // Get to the next word
         while (!isalpha(input[i])){
             if (input[i] == '\0'){
