@@ -64,22 +64,22 @@ void freelist(Node* head){
 // parse the input string and return a Node which is the head of a sorted linked list
 Node* parseinput(char * input){
     // i keeps track of our location in the input string
-    int i;
+    char *ptr = input;
     // Get to the first word, return null if we reach the end of the string
-    for (i=0;!isalpha(input[i]);i++){
-        if (input[i] == '\0'){
+    while (!isalpha(*ptr)){
+        if (*ptr == '\0'){
             return NULL;
         }
+        ptr++;
     }
     // Declare a Node pointer which will point to the head of the linked list
     Node* head = NULL; 
-    int wordlen;
+    char* word;
     while (1){
-        wordlen = 0;
+        word = ptr;
         // Get to the end of the current word
-        while (isalpha(input[i])){
-            wordlen++;
-            i++;
+        while (isalpha(*ptr)){
+            ptr++;
         }
         // Create the new node, and point its word to the start of the current
         // word in the input string
@@ -90,16 +90,16 @@ Node* parseinput(char * input){
         }
         // instead of copying the string, we just point to its location
         // in the input string and keep track of the length 
-        n->word = input + i - wordlen; // slick pointer arithmetic
-        n->len = wordlen;
+        n->word = word; 
+        n->len = ptr - word;
         // insert the node into the linked list
         head = insert(head,n);
         // Get to the next word
-        while (!isalpha(input[i])){
-            if (input[i] == '\0'){
+        while (!isalpha(*ptr)){
+            if (*ptr == '\0'){
                 return head;
             }
-            i++;
+            ptr++;
         }
     }
 }
