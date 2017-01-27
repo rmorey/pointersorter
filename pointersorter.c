@@ -4,121 +4,101 @@
 #include <ctype.h>
 
 // Node in a linked list
-typedef struct Node{
-    // Pointer to the first char of the word in the input string
-    char * word;
-    // Length of the word
+struct Node {
+    char *word;
     int len;
-    // Pointer to the next node in the list
-    struct Node* next;
-} Node;
+    struct Node *next;
+};
 
-
-// Recursively insert the node into the linked list at the correct location
-Node* insert(Node* head, Node* n){
-    if (head == NULL){
+// Recursively insert the node into the linked list and return the head of the list
+struct Node *insert(struct Node *head, struct Node *n)
+{
+    if (head == NULL) {
         return n;
     }
-    // get the min length of the two strings
     int min = (head->len < n->len) ? head->len : n->len;
-    // compare up to the end of the shorter string
-    int cmp = strncmp(head->word,n->word,min);
-    // If they are equal for min bytes, then we want to put the 
-    // shorter one first (it doesn't matter which goes first
-    // if they are equal in length)
-    if (cmp == 0){ 
+    int cmp = strncmp(head->word, n->word, min);
+    if (cmp == 0) {
         cmp = (head->len < n->len) ? -1 : 1;
     }
-    if (cmp < 0){
-        head->next = insert(head->next,n);
+    if (cmp < 0) {
+        head->next = insert(head->next, n);
     }
-    if (cmp > 0){
+    if (cmp > 0) {
         n->next = head;
         head = n;
     }
     return head;
 }
 
-
-// print the list
-void printlist(Node* head){
-    if (head == NULL){
-        return;
+// Create a node with the given word location and length
+struct Node *create_node(char *word, int len)
+{
+    struct Node *n = (struct Node *)malloc(sizeof(struct Node));
+    if (n == NULL) {
+        puts("Malloc failed to allocate space for new Node");
+        exit(-1);
     }
-    printf("%.*s\n",head->len,head->word);
-    printlist(head->next);
+    n->word = word;
+    n->len = len;
+    return n;
 }
-    
 
-// free up all the list memory, recursively
-void freelist(Node* head){
-    if (head == NULL){
+struct Node *insert_word(struct Node *head, char *word, int len)
+{
+    return insert(head, create_node(word,len));
+}
+
+void print_list(struct Node *head)
+{
+    if (head == NULL) {
         return;
     }
-    if (head->next != NULL){
-        freelist(head->next);
+    printf("%.*s\n", head->len, head->word);
+    print_list(head->next);
+}
+
+void free_list(struct Node *head)
+{
+    if (head == NULL) {
+        return;
+    }
+    if (head->next != NULL) {
+        free_list(head->next);
     }
     free(head);
 }
 
 // parse the input string and return a Node which is the head of a sorted linked list
-Node* parseinput(char * input){
-    // i keeps track of our location in the input string
+struct Node *parse_input(char *input)
+{
     char *ptr = input;
-    // Get to the first word, return null if we reach the end of the string
-    while (!isalpha(*ptr)){
-        if (*ptr == '\0'){
-            return NULL;
-        }
-        ptr++;
-    }
-    // Declare a Node pointer which will point to the head of the linked list
-    Node* head = NULL; 
-    char* word;
-    while (1){
-        word = ptr;
-        // Get to the end of the current word
-        while (isalpha(*ptr)){
-            ptr++;
-        }
-        // Create the new node, and point its word to the start of the current
-        // word in the input string
-        Node* n = (Node*)malloc(sizeof(Node));
-        if (n == NULL){
-            printf("Malloc failed to allocate space for new Node\n");
-            exit(-1);
-        }
-        // instead of copying the string, we just point to its location
-        // in the input string and keep track of the length 
-        n->word = word; 
-        n->len = ptr - word;
-        // insert the node into the linked list
-        head = insert(head,n);
-        // Get to the next word
-        while (!isalpha(*ptr)){
-            if (*ptr == '\0'){
+    struct Node *head = NULL;
+    char *word;
+    while (1) {
+        while (!isalpha(*ptr)) {
+            if (*ptr == '\0') {
                 return head;
             }
             ptr++;
         }
+        for (word = ptr; isalpha(*ptr); ptr++) ;
+        head = insert_word(head, word, ptr - word);
     }
 }
 
-int main(int argc, char * argv[]) {
+int main(int argc, char *argv[])
+{
     if (argc < 2) {
-        printf("Needs one argument, none given\n");
+        puts("Needs one argument, none given");
         exit(1);
     }
-    if (argc > 2){
-        printf("Too many arguments, needs exactly one\n");
+    if (argc > 2) {
+        puts("Too many arguments, needs exactly one");
         exit(1);
     }
-    // Parse the input into a sorted linked list
-
-    Node* head = parseinput(argv[1]);
-    // Print the linked list
-    printlist(head);
-    // free up the memory
-    freelist(head);
-	return 0;
+    struct Node *head = parse_input(argv[1]);
+    print_list(head);
+    free_list(head);
+    return 0;
 }
