@@ -61,6 +61,14 @@ void free_list(struct Node *head)
     }
 }
 
+void null_check(struct Node *n, struct Node *head) {
+    if (n == NULL){
+        puts("ERROR: Malloc failed to allocate memory for Node");
+        free_list(head);
+        exit(-1);
+    }
+}
+
 // parse the input string and return a Node which is the head of a sorted linked list
 struct Node *parse_input(char *input)
 {
@@ -71,11 +79,7 @@ struct Node *parse_input(char *input)
         if (isalpha(*ptr)) {
             for (word = ptr; isalpha(*ptr); ptr++) ;
             struct Node *n = create_node(word, ptr - word);
-            if (n == NULL){
-                puts("ERROR: Malloc failed to allocate memory for Node");
-                free_list(head);
-                exit(-1);
-            }
+            null_check(n, head);
             head = insert(head, n);
             ptr--;
         }
