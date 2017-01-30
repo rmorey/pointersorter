@@ -36,17 +36,12 @@ struct Node *create_node(char *word, int len)
 {
     struct Node *n = (struct Node *)malloc(sizeof(struct Node));
     if (n == NULL) {
-        puts("Malloc failed to allocate space for new Node");
+        puts("ERROR: Malloc failed to allocate space for new Node");
         exit(-1);
     }
     n->word = word;
     n->len = len;
     return n;
-}
-
-struct Node *insert_word(struct Node *head, char *word, int len)
-{
-    return insert(head, create_node(word,len));
 }
 
 void print_list(struct Node *head)
@@ -75,16 +70,14 @@ struct Node *parse_input(char *input)
     char *ptr = input;
     struct Node *head = NULL;
     char *word;
-    while (1) {
-        while (!isalpha(*ptr)) {
-            if (*ptr == '\0') {
-                return head;
-            }
-            ptr++;
+    for (ptr = input; *ptr != '\0'; ptr++) {
+        if (isalpha(*ptr)) {
+            for (word = ptr; isalpha(*ptr); ptr++) ;
+            head = insert(head, create_node(word, ptr - word));
+            ptr--;
         }
-        for (word = ptr; isalpha(*ptr); ptr++) ;
-        head = insert_word(head, word, ptr - word);
     }
+    return head;
 }
 
 int main(int argc, char *argv[])
