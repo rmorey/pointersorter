@@ -1,4 +1,5 @@
 all: pointersorter.c
+	mkdir -p bin
 	gcc -O -Wall -o bin/pointersorter pointersorter.c
 
 debug: pointersorter.c
