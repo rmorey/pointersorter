@@ -35,45 +35,48 @@ struct Node *insert(struct Node *head, struct Node *n)
 struct Node *create_node(char *word, int len)
 {
     struct Node *n = (struct Node *)malloc(sizeof(struct Node));
-    if (n == NULL) {
-        puts("ERROR: Malloc failed to allocate space for new Node");
-        exit(-1);
+    if (n != NULL) {
+        n->word = word;
+        n->len = len;
     }
-    n->word = word;
-    n->len = len;
     return n;
 }
 
 void print_list(struct Node *head)
 {
-    if (head == NULL) {
-        return;
-    }
-    printf("%.*s\n", head->len, head->word);
-    print_list(head->next);
+    struct Node *n;
+    for (n = head; n != NULL; n = n->next){
+        printf("%.*s\n", n->len, n->word);
+    }            
 }
 
 void free_list(struct Node *head)
 {
-    if (head == NULL) {
-        return;
+    struct Node *n = head;
+    struct Node *next;
+    while (n != NULL) {
+        next = n->next;
+        free(n);
+        n = next;
     }
-    if (head->next != NULL) {
-        free_list(head->next);
-    }
-    free(head);
 }
 
 // parse the input string and return a Node which is the head of a sorted linked list
 struct Node *parse_input(char *input)
 {
     char *ptr = input;
-    struct Node *head = NULL;
     char *word;
+    struct Node *head = NULL;
     for (ptr = input; *ptr != '\0'; ptr++) {
         if (isalpha(*ptr)) {
             for (word = ptr; isalpha(*ptr); ptr++) ;
-            head = insert(head, create_node(word, ptr - word));
+            struct Node *n = create_node(word, ptr - word);
+            if (n == NULL){
+                puts("ERROR: Malloc failed to allocate memory for Node");
+                free_list(head);
+                exit(-1);
+            }
+            head = insert(head, n);
             ptr--;
         }
     }
