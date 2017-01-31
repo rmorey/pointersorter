@@ -5,13 +5,14 @@
 
 // Node in a linked list
 struct Node {
+    // Pointer to the char in the input string that starts this word
     char *word;
     int len;
     struct Node *next;
 };
 
 // Recursively insert the node into the linked list and return the head of the list
-struct Node *insert(struct Node *head, struct Node *n)
+struct Node *insert(struct Node *n, struct Node *head)
 {
     if (head == NULL) {
         return n;
@@ -22,7 +23,7 @@ struct Node *insert(struct Node *head, struct Node *n)
         cmp = (head->len < n->len) ? -1 : 1;
     }
     if (cmp < 0) {
-        head->next = insert(head->next, n);
+        head->next = insert(n, head->next);
     }
     if (cmp > 0) {
         n->next = head;
@@ -45,9 +46,9 @@ struct Node *create_node(char *word, int len)
 void print_list(struct Node *head)
 {
     struct Node *n;
-    for (n = head; n != NULL; n = n->next){
+    for (n = head; n != NULL; n = n->next) {
         printf("%.*s\n", n->len, n->word);
-    }            
+    }
 }
 
 void free_list(struct Node *head)
@@ -61,8 +62,9 @@ void free_list(struct Node *head)
     }
 }
 
-void null_check(struct Node *n, struct Node *head) {
-    if (n == NULL){
+void null_check(struct Node *n, struct Node *head)
+{
+    if (n == NULL) {
         puts("ERROR: Malloc failed to allocate memory for Node");
         free_list(head);
         exit(-1);
@@ -80,7 +82,7 @@ struct Node *parse_input(char *input)
             for (word = ptr; isalpha(*ptr); ptr++) ;
             struct Node *n = create_node(word, ptr - word);
             null_check(n, head);
-            head = insert(head, n);
+            head = insert(n, head);
             ptr--;
         }
     }
@@ -100,5 +102,5 @@ int main(int argc, char *argv[])
     struct Node *head = parse_input(argv[1]);
     print_list(head);
     free_list(head);
-    return 0;
+    exit(0);
 }
