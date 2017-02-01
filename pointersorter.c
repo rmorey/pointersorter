@@ -4,38 +4,39 @@
 #include <ctype.h>
 
 // Node in a linked list
-struct Node {
-    // Pointer to the char in the input string that starts this word
-    char *word;
+typedef struct Node {
+    char *word;                 // Not necessarily null terminated! 
     int len;
     struct Node *next;
-};
+} Node;
 
-// Recursively insert the node into the linked list and return the head of the list
-struct Node *insert(struct Node *n, struct Node *head)
+// Recursively insert the node into the linked list at *head_ptr
+void insert(Node * n, Node ** head_ptr)
 {
+    Node *head = *head_ptr;
     if (head == NULL) {
-        return n;
+        *head_ptr = n;
+        return;
     }
     int min = (head->len < n->len) ? head->len : n->len;
     int cmp = strncmp(head->word, n->word, min);
     if (cmp == 0) {
         cmp = (head->len < n->len) ? -1 : 1;
     }
-    if (cmp < 0) {
-        head->next = insert(n, head->next);
-    }
     if (cmp > 0) {
         n->next = head;
-        head = n;
+        *head_ptr = n;
     }
-    return head;
+    if (cmp < 0) {
+        insert(n, &(head->next));
+    }
 }
 
-// Create a node with the given word location and length
-struct Node *create_node(char *word, int len)
+// Return a new node with the given word location and length. Return NULL
+// if malloc() fails.
+Node *create_node(char *word, int len)
 {
-    struct Node *n = (struct Node *)malloc(sizeof(struct Node));
+    Node *n = (Node *) malloc(sizeof(Node));
     if (n != NULL) {
         n->word = word;
         n->len = len;
@@ -43,26 +44,27 @@ struct Node *create_node(char *word, int len)
     return n;
 }
 
-void print_list(struct Node *head)
+// Print the linked list.
+void print_list(Node * head)
 {
-    struct Node *n;
+    Node *n;
     for (n = head; n != NULL; n = n->next) {
         printf("%.*s\n", n->len, n->word);
     }
 }
 
-void free_list(struct Node *head)
+// Free up the list memory.
+void free_list(Node * head)
 {
-    struct Node *n = head;
-    struct Node *next;
-    while (n != NULL) {
+    Node *n, *next;
+    for (n = head; n != NULL; n = next) {
         next = n->next;
         free(n);
-        n = next;
     }
 }
 
-void null_check(struct Node *n, struct Node *head)
+// Check if n is NULL, and if so free the list at head, and exit.
+void null_check(Node * n, Node * head)
 {
     if (n == NULL) {
         puts("ERROR: Malloc failed to allocate memory for Node");
@@ -71,24 +73,25 @@ void null_check(struct Node *n, struct Node *head)
     }
 }
 
-// parse the input string and return a Node which is the head of a sorted linked list
-struct Node *parse_input(char *input)
+// parse the input string and return a Node which is the head of a sorted 
+// linked list
+Node *parse_input(char *input)
 {
-    char *ptr = input;
-    char *word;
-    struct Node *head = NULL;
+    char *ptr, *word;
+    Node *head = NULL;
     for (ptr = input; *ptr != '\0'; ptr++) {
         if (isalpha(*ptr)) {
             for (word = ptr; isalpha(*ptr); ptr++) ;
-            struct Node *n = create_node(word, ptr - word);
+            Node *n = create_node(word, ptr - word);
             null_check(n, head);
-            head = insert(n, head);
+            insert(n, &head);
             ptr--;
         }
     }
     return head;
 }
 
+// Parse the input string, print the resulting list, then free its memory
 int main(int argc, char *argv[])
 {
     if (argc < 2) {
@@ -99,8 +102,10 @@ int main(int argc, char *argv[])
         puts("Too many arguments, needs exactly one");
         exit(1);
     }
-    struct Node *head = parse_input(argv[1]);
-    print_list(head);
-    free_list(head);
+    Node *head = parse_input(argv[1]);
+    if (head != NULL) {
+        print_list(head);
+        free_list(head);
+    }
     exit(0);
 }
