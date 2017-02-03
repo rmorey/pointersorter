@@ -10,7 +10,7 @@ typedef struct Node {
     struct Node *next;
 } Node;
 
-// Recursively insert the node into the linked list at *head_ptr
+// Recursively insert n into the linked list at *head_ptr
 void insert(Node * n, Node ** head_ptr)
 {
     Node *head = *head_ptr;
